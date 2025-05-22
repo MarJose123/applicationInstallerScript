@@ -404,39 +404,42 @@ if ($laravelInstalled) {
 
     writeln('');
     writeln('Laravel environment configuration completed successfully!');
-} /**
- * Vanilla PHP Specific
- */ else {
+} else {
+    /**
+     * Vanilla PHP Specific
+     */
     writeln('Web App is using vanilla PHP.');
-
     // Check if .env file exists, if not, create it
     if (!checkIfEnvExist()) {
-        writeln('No .env file found. Creating one...');
-        if (createBasicEnvFile()) {
-            writeln('.env file created successfully!');
+        if (checkIfHasEnvExampleExist()) {
+            writeln('No .env file found. Creating one from .env.example...');
+            if (copy(__DIR__ . '/.env.example', __DIR__ . '/.env')) {
+                writeln('.env file created successfully from .env.example!');
+            }
         } else {
-            writeln('Failed to create .env file!');
+            writeln('No .env.example file found.');
         }
     }
 
-    writeln('Setting up environment variables...');
+    if (checkIfEnvExist()) {
+        writeln('Setting up environment variables...');
+        // Application configuration
+        $appConfigItems = [['key' => 'APP_NAME', 'question' => 'Enter Application Name: ', 'default' => 'MyApp'], ['key' => 'APP_ENV', 'question' => 'Enter Environment (production/development): ', 'default' => 'development']];
 
-    // Application configuration
-    $appConfigItems = [['key' => 'APP_NAME', 'question' => 'Enter Application Name: ', 'default' => 'MyApp'], ['key' => 'APP_ENV', 'question' => 'Enter Environment (production/development): ', 'default' => 'development']];
+        $appValues = configureEnvSection('Application configuration', $appConfigItems);
 
-    $appValues = configureEnvSection('Application configuration', $appConfigItems);
+        // Set APP_DEBUG based on environment
+        $appDebug = $appValues['APP_ENV'] === 'development' ? 'true' : 'false';
+        updateEnvVariable('APP_DEBUG', $appDebug);
+        writeln('APP_DEBUG set to ' . $appDebug . ' based on environment.');
 
-    // Set APP_DEBUG based on environment
-    $appDebug = $appValues['APP_ENV'] === 'development' ? 'true' : 'false';
-    updateEnvVariable('APP_DEBUG', $appDebug);
-    writeln('APP_DEBUG set to ' . $appDebug . ' based on environment.');
+        // Database configuration
+        $dbConfigItems = [['key' => 'DB_HOST', 'question' => 'Enter Database Host: ', 'default' => 'localhost'], ['key' => 'DB_NAME', 'question' => 'Enter Database Name: ', 'default' => 'myapp'], ['key' => 'DB_USER', 'question' => 'Enter Database Username: ', 'default' => 'root'], ['key' => 'DB_PASS', 'question' => 'Enter Database Password: ', 'isPassword' => true]];
 
-    // Database configuration
-    $dbConfigItems = [['key' => 'DB_HOST', 'question' => 'Enter Database Host: ', 'default' => 'localhost'], ['key' => 'DB_NAME', 'question' => 'Enter Database Name: ', 'default' => 'myapp'], ['key' => 'DB_USER', 'question' => 'Enter Database Username: ', 'default' => 'root'], ['key' => 'DB_PASS', 'question' => 'Enter Database Password: ', 'isPassword' => true]];
+        configureEnvSection('Database configuration', $dbConfigItems);
 
-    configureEnvSection('Database configuration', $dbConfigItems);
-
-    writeln('Environment variables updated successfully!');
+        writeln('Environment variables updated successfully!');
+    }
 }
 
 writeln('');
@@ -464,3 +467,8 @@ if ($composerInstallWithoutDev) {
 
 writeln('');
 writeln('Installation completed successfully!');
+
+$unlink = confirm('Would you like to remove the install.php file?', true);
+if ($unlink) {
+    unlink(__FILE__);
+}
