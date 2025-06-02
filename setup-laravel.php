@@ -316,9 +316,9 @@ confirm('Execute `composer install --no-dev`?', true)
     : run('composer install --no-interaction');
 
 run('php artisan key:generate');
-
 run('php artisan storage:unlink'); // refresh the symlink
 run('php artisan storage:link');
+run('php artisan migrate --force --no-interaction');
 
 
 // place here your additional call or DB Seeders
