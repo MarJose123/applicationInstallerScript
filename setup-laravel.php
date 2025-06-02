@@ -321,7 +321,23 @@ run('php artisan storage:link');
 run('php artisan migrate --force --no-interaction');
 
 
-// place here your additional call or DB Seeders
+/**
+ * ===========================================================
+ *
+ * Place here your additional call or DB Seeders
+ *
+ * ============================================================
+*/
+
+// run('php artisan db:seed');
 
 
+
+/**
+ * ===========================================================
+ *
+ * Script Cleanup
+ *
+ * ============================================================
+ */
 confirm('Let this script delete itself?', true) && unlink(__FILE__);
